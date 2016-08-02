@@ -18,6 +18,8 @@ var DefaultDisableProgramRerunOutput = false
 // MatcherFunc returns whether the file should be watched for the reload
 type MatcherFunc func(string) bool
 
+type KillFunc func(*os.Process) error
+
 // DefaultGoMatcher is the default Matcher for the Project iteral
 func DefaultGoMatcher(fullname string) bool {
 	return (filepath.Ext(fullname) == goExt) ||
@@ -66,6 +68,9 @@ type Project struct {
 	// the default accepts all subdirectories but ignores the ".git", "node_modules" and "vendor"
 	Watcher MatcherFunc
 	Matcher MatcherFunc
+
+	// Custom kill function - for your special termination requirements
+	CustomKillFunc KillFunc
 	// AllowReloadAfter skip reload on file changes that made too fast from the last reload
 	// minimum allowed duration is 3 seconds.
 	AllowReloadAfter time.Duration

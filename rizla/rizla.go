@@ -115,7 +115,11 @@ func Run(sources ...string) {
 	defer func() {
 		watcher.Close()
 		for _, p := range projects {
-			killProcess(p.proc)
+			if p.CustomKillFunc != nil {
+				p.CustomKillFunc(p.proc)
+			} else {
+				killProcess(p.proc)
+			}
 		}
 		if !hasStoppedManually {
 			// if something bad happens and program exits, show an unexpected error message
@@ -167,7 +171,12 @@ func Run(sources ...string) {
 						p.OnReload(filename)
 
 						// kill previous running instance
-						err := killProcess(p.proc)
+						var err error
+						if p.CustomKillFunc != nil {
+							err = p.CustomKillFunc(p.proc)
+						} else {
+							err = killProcess(p.proc)
+						}
 						if err != nil {
 							p.Err.Dangerf(err.Error())
 							continue
